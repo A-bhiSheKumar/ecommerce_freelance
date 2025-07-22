@@ -1,4 +1,16 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 const LoginForm = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    // Do your login logic here
+    console.log("Logging in with:", { email, password });
+    navigate("/home");
+  };
+
   return (
     <div className="min-h-screen flex">
       {/* Left side - Image and Text */}
@@ -10,10 +22,10 @@ const LoginForm = () => {
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="relative z-10 text-white text-center px-8 py-10 backdrop-brightness-75">
-            <h1 className="text-3xl font-semibold">Our Organigination</h1>
+            <h1 className="text-3xl font-semibold">Our Organisation</h1>
             <p className="text-xl mt-2">Anything you can Imagine</p>
             <p className="text-sm mt-1 opacity-75">
-              Generate anytype of art with Openartistic
+              Generate any type of art with Openartistic
             </p>
           </div>
         </div>
@@ -32,15 +44,18 @@ const LoginForm = () => {
             </p>
           </div>
 
-          <form className="space-y-4">
+          {/* React-controlled form */}
+          <div className="space-y-4">
             <div>
               <label className="block text-white text-sm mb-1">
                 Email address
               </label>
               <input
                 type="email"
-                defaultValue="Hello@basitkhan.design"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-md bg-[#0d1025] text-white border border-[#333] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter your email"
               />
             </div>
 
@@ -48,8 +63,10 @@ const LoginForm = () => {
               <label className="block text-white text-sm mb-1">Password</label>
               <input
                 type="password"
-                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-md bg-[#0d1025] text-white border border-[#333] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter your password"
               />
             </div>
 
@@ -60,12 +77,12 @@ const LoginForm = () => {
             </div>
 
             <button
-              type="submit"
+              onClick={handleLogin}
               className="w-full py-3 rounded-md bg-gradient-to-r from-[#202020] to-black text-white font-semibold hover:opacity-90 transition"
             >
               Sign in
             </button>
-          </form>
+          </div>
         </div>
       </div>
     </div>
