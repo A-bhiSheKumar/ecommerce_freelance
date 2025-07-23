@@ -29,6 +29,7 @@ const LoginForm = () => {
         localStorage.setItem("user_id", response.user_id.toString());
         localStorage.setItem("role", response.role);
         localStorage.setItem("username", response.username);
+        localStorage.setItem("email", response.email);
 
         navigate("/home");
       } else {
@@ -125,7 +126,7 @@ const LoginForm = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="input-style"
-                placeholder="Enter username"
+                placeholder="Enter username or Email"
               />
             </div>
 
@@ -196,13 +197,7 @@ const LoginForm = () => {
               </>
             )}
 
-            {!isSignup && (
-              <div className="text-right">
-                <a href="#" className="text-sm text-blue-400 hover:underline">
-                  Forgot Password?
-                </a>
-              </div>
-            )}
+            {!isSignup && <div className="text-right"></div>}
 
             <button
               onClick={isSignup ? handleSignup : handleLogin}
