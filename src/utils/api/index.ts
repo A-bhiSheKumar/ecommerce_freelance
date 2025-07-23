@@ -1,3 +1,5 @@
+import { login } from "./auth/login";
+import { register } from "./auth/register";
 import {
   addCustomerInfo,
   addPendingDueNote,
@@ -6,6 +8,10 @@ import {
 } from "./billing/billing.api";
 
 export const api = {
+  auth: {
+    login: login,
+    register: register,
+  },
   userInfo: {
     addCustomerInfo: addCustomerInfo,
   },

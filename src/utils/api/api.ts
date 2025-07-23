@@ -33,7 +33,7 @@ const post = async (endpoint: Endpoint, payload: Payload, headers: Headers) => {
       }
     );
     const { status } = response;
-    if (status === 200) {
+    if (status === 200 || status === 201) {
       return response;
     }
   } catch (error) {
