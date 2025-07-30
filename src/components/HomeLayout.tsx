@@ -1,10 +1,10 @@
 import Sidebar from "./Sidebar";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import DashboardHome from "./adminSideBarComponents/DashboardHome";
-import AddProduct from "./adminSideBarComponents/AddProduct";
 import ViewCotation from "./adminSideBarComponents/ViewCotation";
 import ManagaeProfile from "./adminSideBarComponents/ManagaeProfile";
 import AddUser from "./adminSideBarComponents/ManageUser";
+import ProductDetails from "./adminSideBarComponents/ProductDetails";
 
 const HomeLayout = () => {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const HomeLayout = () => {
         <Routes>
           <Route path="dashboard" element={<DashboardHome />} />
           <Route path="add-user" element={<AddUser />} />
-          <Route path="add-product" element={<AddProduct />} />
+          <Route path="product-details" element={<ProductDetails />} />
           <Route path="view-cotation" element={<ViewCotation />} />
           <Route path="manage-profile" element={<ManagaeProfile />} />
           {/* Default route */}
