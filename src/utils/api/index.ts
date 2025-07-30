@@ -1,6 +1,7 @@
 import { login } from "./auth/login";
 import { register } from "./auth/register";
 import { addCategory } from "./products/addCategory";
+import { deleteCategory } from "./products/deleteCategory";
 import { editCategory } from "./products/editCategory";
 import { getCategoryList } from "./products/getCategory";
 
@@ -13,5 +14,6 @@ export const api = {
     getCategoryList: getCategoryList,
     addCategory: addCategory,
     editCategory: editCategory,
+    deleteCategory: deleteCategory,
   },
 };

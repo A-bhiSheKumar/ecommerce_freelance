@@ -4,16 +4,10 @@ import {
   NormalizedProduct,
   Product,
 } from "../../interface/CategoriesInterface";
-import CategoryForm, { CategoryPayload } from "../../shared/CategoriesForm";
+import CategoryForm from "../../shared/CategoriesForm";
 import toast from "react-hot-toast";
 import { SkeletonCard } from "../../shared/SkeletonCard";
 import { normalizeProduct } from "../../commanFuntion/normalizeProduct";
-
-const currency = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-  maximumFractionDigits: 0,
-});
 
 const EmptyState = ({ onAdd }: { onAdd: () => void }) => (
   <div className="flex flex-col items-center justify-center text-center py-20">
@@ -39,12 +33,8 @@ const ProductDetails: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [editingCategory, setEditingCategory] =
     useState<NormalizedProduct | null>(null);
-
   const [fetchError, setFetchError] = useState<string>("");
   const [search, setSearch] = useState<string>("");
-  const [sortBy, setSortBy] = useState<
-    "price-asc" | "price-desc" | "name" | "newest"
-  >("newest");
   const [openForm, setOpenForm] = useState(false);
 
   const fetchProducts = async () => {
@@ -69,13 +59,11 @@ const ProductDetails: React.FC = () => {
     void fetchProducts();
   }, []);
 
-  const handleCreateCategory = async (payload: CategoryPayload) => {
+  const handleCreateCategory = async (formData: FormData) => {
     try {
-      const response = await api.categories.addCategory(payload);
-      console.log("response--->>>", response);
+      const response = await api.categories.addCategory(formData);
       if (response) {
         toast.success("Category added successfully! 🎉");
-        // Refresh list and close modal
         await fetchProducts();
         setOpenForm(false);
       }
@@ -84,45 +72,13 @@ const ProductDetails: React.FC = () => {
       console.error(error);
     }
   };
-  const filtered = useMemo<NormalizedProduct[]>(() => {
-    const q = search.trim().toLowerCase();
 
-    let list = products.filter((p) => {
-      const name = p.name.toLowerCase();
-      const cat = p.category.toLowerCase();
-      return q === "" || name.includes(q) || cat.includes(q);
-    });
-
-    switch (sortBy) {
-      case "price-asc":
-        list = [...list].sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-        break;
-      case "price-desc":
-        list = [...list].sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
-        break;
-      case "name":
-        list = [...list].sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case "newest":
-      default:
-        list = [...list].sort((a, b) => {
-          const A = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-          const B = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          return B - A;
-        });
-        break;
-    }
-
-    return list;
-  }, [products, search, sortBy]);
-
-  const handleEditCategory = async (payload: CategoryPayload) => {
+  const handleEditCategory = async (formData: FormData) => {
     if (!editingCategory) return;
-
     try {
       const response = await api.categories.editCategory(
         editingCategory.id,
-        payload
+        formData
       );
       if (response) {
         toast.success("Category updated successfully!");
@@ -135,6 +91,34 @@ const ProductDetails: React.FC = () => {
       console.error(error);
     }
   };
+
+  const handleDeleteCategory = async (id: string | number) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this category?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const response = await api.categories.deleteCategory(id);
+      if (response) {
+        toast.success("Category deleted successfully!");
+        await fetchProducts();
+      }
+    } catch (error) {
+      toast.error("Failed to delete category.");
+      console.error(error);
+    }
+  };
+
+  const filtered = useMemo<NormalizedProduct[]>(() => {
+    const q = search.trim().toLowerCase();
+
+    return products.filter((p) => {
+      const name = p.name.toLowerCase();
+      const cat = p.category.toLowerCase();
+      return q === "" || name.includes(q) || cat.includes(q);
+    });
+  }, [products, search]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0b0e22] to-[#0f1a4d] text-white">
@@ -173,24 +157,6 @@ const ProductDetails: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <select
-                value={sortBy}
-                onChange={(e) =>
-                  setSortBy(
-                    e.target.value as
-                      | "price-asc"
-                      | "price-desc"
-                      | "name"
-                      | "newest"
-                  )
-                }
-                className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                <option value="newest">Sort: Newest</option>
-                <option value="name">Sort: Name</option>
-                <option value="price-asc">Sort: Price (Low → High)</option>
-                <option value="price-desc">Sort: Price (High → Low)</option>
-              </select>
               <div className="md:hidden text-sm text-white/60">
                 {filtered.length} result{filtered.length !== 1 ? "s" : ""}
               </div>
@@ -222,21 +188,18 @@ const ProductDetails: React.FC = () => {
         ) : filtered.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((product) => {
-              const price =
-                typeof product.price === "number"
-                  ? currency.format(product.price)
-                  : null;
-
               return (
                 <div
                   key={product.id}
                   className="group rounded-xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/20 transition shadow-sm hover:shadow-md overflow-hidden"
                 >
                   {/* Image / Placeholder */}
-                  <div className="h-40 w-full bg-gradient-to-br from-white/10 to-white/0 flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center text-lg font-semibold">
-                      {product.name.slice(0, 1).toUpperCase()}
-                    </div>
+                  <div className="h-40 w-full bg-white flex items-center justify-center">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="max-h-full max-w-full object-contain"
+                    />
                   </div>
 
                   {/* Body */}
@@ -252,20 +215,18 @@ const ProductDetails: React.FC = () => {
                             setEditingCategory(product);
                             setOpenForm(true);
                           }}
-                          className="text-white/60 hover:text-white/90"
+                          className="text-green-200 font-bold"
                           title="Edit"
                         >
-                          ✏️
+                          Edit
                         </button>
+
                         <button
-                          onClick={() => {
-                            // Optionally add delete logic here
-                            toast("Delete logic here");
-                          }}
-                          className="text-white/60 hover:text-red-400"
+                          onClick={() => handleDeleteCategory(product.id)}
+                          className="text-red-400"
                           title="Delete"
                         >
-                          🗑️
+                          Delete
                         </button>
                       </div>
                     </div>
@@ -273,12 +234,6 @@ const ProductDetails: React.FC = () => {
                     {product.description && (
                       <p className="text-sm text-white/60 mt-1 line-clamp-2">
                         {product.description}
-                      </p>
-                    )}
-
-                    {price && (
-                      <p className="mt-3 text-sm font-semibold text-blue-300">
-                        {price}
                       </p>
                     )}
                   </div>
@@ -296,9 +251,25 @@ const ProductDetails: React.FC = () => {
         open={openForm}
         onClose={() => {
           setOpenForm(false);
-          setEditingCategory(null); // clear after close
+          setEditingCategory(null);
         }}
-        onSubmit={handleCreateCategory}
+        onSubmit={(formData) => {
+          if (editingCategory) {
+            formData.append("id", editingCategory.id);
+            handleEditCategory(formData);
+          } else {
+            handleCreateCategory(formData);
+          }
+        }}
+        defaultValues={
+          editingCategory
+            ? {
+                name: editingCategory.name,
+                description: editingCategory.description ?? "",
+                imageUrl: editingCategory.image,
+              }
+            : undefined
+        }
       />
     </div>
   );

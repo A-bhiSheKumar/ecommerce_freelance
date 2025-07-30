@@ -1,17 +1,30 @@
 import { request } from "../api";
 import { headers } from "../../../config/config";
+import { AUTHORIZATION } from "../../../constants/api/auth";
+import { Payload } from "../../../types/api/api.types";
 // import { MESSAGE } from "../../../constants/api/message";
 // import {Payload} from '../../../types/api/api.types';
 
-const { put } = request;
+const { patch } = request;
 
 const initialRoute = "categories";
 
-export const editCategory = async (id: number | string, payload: any) => {
+export const editCategory = async (
+  id: number | string,
+  payload: Payload | FormData
+) => {
   try {
     const endpoint = `${initialRoute}/edit-category/${id}/`;
-    const response = await put(endpoint, payload, headers);
+    const token = localStorage.getItem("access_token");
+    const customHeaders = {
+      ...headers,
+      [AUTHORIZATION.Authorization]: `${AUTHORIZATION.Bearer} ${token}`,
+    };
 
+    if (payload instanceof FormData) {
+      delete (customHeaders as any)["Content-Type"];
+    }
+    const response = await patch(endpoint, payload, customHeaders);
     if (response?.status === 200) {
       return response.data;
     }

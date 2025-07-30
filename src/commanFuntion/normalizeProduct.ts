@@ -2,7 +2,9 @@ import { NormalizedProduct, Product } from "../interface/CategoriesInterface";
 
 export function normalizeProduct(p: Product, index: number): NormalizedProduct {
   const id =
-    (typeof p.id === "string" && p.id) ||
+    (typeof p.id === "number" || typeof p.id === "string"
+      ? String(p.id)
+      : null) ||
     (typeof p._id === "string" && p._id) ||
     (typeof p.slug === "string" && p.slug) ||
     (typeof p.name === "string" && p.name) ||
@@ -14,14 +16,6 @@ export function normalizeProduct(p: Product, index: number): NormalizedProduct {
     typeof p.category === "string" && p.category.trim()
       ? p.category
       : "Uncategorized";
-
-  let priceNum: number | undefined;
-  if (typeof p.price === "number") {
-    priceNum = Number.isFinite(p.price) ? p.price : undefined;
-  } else if (typeof p.price === "string") {
-    const parsed = Number(p.price);
-    priceNum = Number.isFinite(parsed) ? parsed : undefined;
-  }
 
   let createdAtStr: string | undefined;
   if (p.createdAt instanceof Date) {
@@ -38,7 +32,7 @@ export function normalizeProduct(p: Product, index: number): NormalizedProduct {
     id,
     name,
     category,
-    price: priceNum,
+    image: p.image || "/placeholder.jpg", // fallback
     description: typeof p.description === "string" ? p.description : undefined,
     createdAt: createdAtStr,
   };
