@@ -255,7 +255,7 @@ const ProductDetails: React.FC = () => {
         }}
         onSubmit={(formData) => {
           if (editingCategory) {
-            formData.append("id", editingCategory.id);
+            formData.append("id", String(editingCategory.id)); // ✅ ensure it's a string
             handleEditCategory(formData);
           } else {
             handleCreateCategory(formData);

@@ -11,7 +11,7 @@ export interface Product {
 }
 
 export interface NormalizedProduct {
-  id: number;
+  id: number | string;
   name: string;
   category: string;
   price?: number;
