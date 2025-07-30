@@ -2,7 +2,7 @@ import Cookies from "js-cookie";
 
 const csrftoken = Cookies.get("csrftoken");
 
-export const url = "https://sspp-backend-1yf5.onrender.com";
+export const url = "http://51.20.134.9:8080";
 // zip -r app.zip dist package.json package-lock.json node_modules
 // export const url = "http://localhost:4000";
 // export const url = "https://sundarban-resort-node-server.onrender.com";

@@ -22,7 +22,7 @@ const HomeLayout = () => {
         <Routes>
           <Route path="dashboard" element={<DashboardHome />} />
           <Route path="add-user" element={<AddUser />} />
-          <Route path="product-details" element={<ProductDetails />} />
+          <Route path="category-details" element={<ProductDetails />} />
           <Route path="view-cotation" element={<ViewCotation />} />
           <Route path="manage-profile" element={<ManagaeProfile />} />
           {/* Default route */}

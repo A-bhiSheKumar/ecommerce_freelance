@@ -6,66 +6,14 @@ import {
 } from "../../interface/CategoriesInterface";
 import CategoryForm, { CategoryPayload } from "../../shared/CategoriesForm";
 import toast from "react-hot-toast";
+import { SkeletonCard } from "../../shared/SkeletonCard";
+import { normalizeProduct } from "../../commanFuntion/normalizeProduct";
 
 const currency = new Intl.NumberFormat("en-IN", {
   style: "currency",
   currency: "INR",
   maximumFractionDigits: 0,
 });
-
-/** Turn any Product into a NormalizedProduct that the UI can safely consume */
-function normalizeProduct(p: Product, index: number): NormalizedProduct {
-  const id =
-    (typeof p.id === "string" && p.id) ||
-    (typeof p._id === "string" && p._id) ||
-    (typeof p.slug === "string" && p.slug) ||
-    (typeof p.name === "string" && p.name) ||
-    String(index);
-
-  const name =
-    typeof p.name === "string" && p.name.trim() ? p.name : "Untitled";
-  const category =
-    typeof p.category === "string" && p.category.trim()
-      ? p.category
-      : "Uncategorized";
-
-  let priceNum: number | undefined;
-  if (typeof p.price === "number") {
-    priceNum = Number.isFinite(p.price) ? p.price : undefined;
-  } else if (typeof p.price === "string") {
-    const parsed = Number(p.price);
-    priceNum = Number.isFinite(parsed) ? parsed : undefined;
-  }
-
-  let createdAtStr: string | undefined;
-  if (p.createdAt instanceof Date) {
-    createdAtStr = p.createdAt.toISOString();
-  } else if (
-    typeof p.createdAt === "string" ||
-    typeof p.createdAt === "number"
-  ) {
-    const d = new Date(p.createdAt);
-    if (!isNaN(d.getTime())) createdAtStr = d.toISOString();
-  }
-
-  return {
-    id,
-    name,
-    category,
-    price: priceNum,
-    description: typeof p.description === "string" ? p.description : undefined,
-    createdAt: createdAtStr,
-  };
-}
-
-const SkeletonCard = () => (
-  <div className="rounded-xl bg-white/5 backdrop-blur-md border border-white/10 p-4 animate-pulse">
-    <div className="h-40 w-full bg-white/10 rounded-lg mb-4" />
-    <div className="h-4 w-3/4 bg-white/10 rounded mb-2" />
-    <div className="h-3 w-1/2 bg-white/10 rounded mb-3" />
-    <div className="h-5 w-1/3 bg-white/10 rounded" />
-  </div>
-);
 
 const EmptyState = ({ onAdd }: { onAdd: () => void }) => (
   <div className="flex flex-col items-center justify-center text-center py-20">
@@ -89,6 +37,9 @@ const EmptyState = ({ onAdd }: { onAdd: () => void }) => (
 const ProductDetails: React.FC = () => {
   const [products, setProducts] = useState<NormalizedProduct[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [editingCategory, setEditingCategory] =
+    useState<NormalizedProduct | null>(null);
+
   const [fetchError, setFetchError] = useState<string>("");
   const [search, setSearch] = useState<string>("");
   const [sortBy, setSortBy] = useState<
@@ -165,13 +116,33 @@ const ProductDetails: React.FC = () => {
     return list;
   }, [products, search, sortBy]);
 
+  const handleEditCategory = async (payload: CategoryPayload) => {
+    if (!editingCategory) return;
+
+    try {
+      const response = await api.categories.editCategory(
+        editingCategory.id,
+        payload
+      );
+      if (response) {
+        toast.success("Category updated successfully!");
+        await fetchProducts();
+        setOpenForm(false);
+        setEditingCategory(null);
+      }
+    } catch (error) {
+      toast.error("Failed to update category.");
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0b0e22] to-[#0f1a4d] text-white">
       <div className="mx-auto max-w-7xl px-6 py-8">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Products</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Category</h1>
             <p className="text-sm text-white/60">
               Manage your catalog and keep everything up to date.
             </p>
@@ -180,7 +151,7 @@ const ProductDetails: React.FC = () => {
             onClick={() => setOpenForm(true)}
             className="inline-flex items-center gap-2 rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition"
           >
-            <span className="text-sm font-medium">+ Add Product</span>
+            <span className="text-sm font-medium">+ Add Category</span>
           </button>
         </div>
 
@@ -274,9 +245,29 @@ const ProductDetails: React.FC = () => {
                       <h3 className="text-base font-semibold leading-tight line-clamp-1">
                         {product.name}
                       </h3>
-                      <span className="text-[10px] uppercase tracking-wide bg-white/10 border border-white/10 rounded-full px-2 py-1 text-white/70">
-                        {product.category}
-                      </span>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingCategory(product);
+                            setOpenForm(true);
+                          }}
+                          className="text-white/60 hover:text-white/90"
+                          title="Edit"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Optionally add delete logic here
+                            toast("Delete logic here");
+                          }}
+                          className="text-white/60 hover:text-red-400"
+                          title="Delete"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </div>
 
                     {product.description && (
@@ -303,7 +294,10 @@ const ProductDetails: React.FC = () => {
       {/* Modal */}
       <CategoryForm
         open={openForm}
-        onClose={() => setOpenForm(false)}
+        onClose={() => {
+          setOpenForm(false);
+          setEditingCategory(null); // clear after close
+        }}
         onSubmit={handleCreateCategory}
       />
     </div>

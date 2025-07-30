@@ -5,11 +5,12 @@ export interface CategoryPayload {
   description: string;
 }
 
-interface CategoryFormProps {
+type CategoryFormProps = {
   open: boolean;
   onClose: () => void;
-  onSubmit: (payload: CategoryPayload) => Promise<void> | void;
-}
+  onSubmit: (payload: CategoryPayload) => void;
+  defaultValues?: Partial<CategoryPayload>;
+};
 
 const CategoryForm: React.FC<CategoryFormProps> = ({
   open,

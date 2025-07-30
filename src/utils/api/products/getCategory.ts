@@ -9,7 +9,7 @@ const initialRoute = "categories";
 
 export const getCategoryList = async () => {
   try {
-    const endpoint = `${initialRoute}/all-categories`;
+    const endpoint = `${initialRoute}/all-categories/`;
     const response = await get(endpoint, {
       ...headers,
     });
