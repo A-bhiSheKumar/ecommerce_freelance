@@ -1,8 +1,7 @@
-export const menuItems = [
+export const adminMenuItems = [
   { label: "Dashboard", icon: "Dashboard" },
-  { label: "History", icon: "TableChart" },
-  { label: "Billing", icon: "Receipt" },
-  { label: "Profile", icon: "Person" },
-  { label: "Logout", icon: "Logout" },
-  { label: "Check Bills", icon: "Check" },
+  { label: "Add User", icon: "Group" },
+  { label: "Add Product", icon: "AddBox" },
+  { label: "View Quotation", icon: "RequestQuote" },
+  { label: "Manage Profile", icon: "ManageAccounts" },
 ];

@@ -1,7 +1,9 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Home from "./components/Home";
+
 import LoginForm from "./components/LoginForm";
 import { Toaster } from "react-hot-toast";
+import HomeLayout from "./components/HomeLayout";
+
 const App = () => {
   return (
     <>
@@ -9,7 +11,7 @@ const App = () => {
       <Router>
         <Routes>
           <Route path="/" element={<LoginForm />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/home/*" element={<HomeLayout />} />
         </Routes>
       </Router>
     </>
