@@ -223,9 +223,20 @@ const ProductDetails = () => {
                   Category:{" "}
                   <span className="text-white">{product.category?.name}</span>
                 </p>
+                <p className="text-sm text-white/60">
+                  Stock Quantity:{" "}
+                  <span className="text-white">{product.stock_quantity}</span>
+                </p>
+                <p className="text-sm text-white/60">
+                  Meta Title:{" "}
+                  <span className="text-white">{product.meta_title}</span>
+                </p>
 
+                <p className="text-sm text-white/60">
+                  Meta Description:{" "}
+                  <span className="text-white">{product.meta_description}</span>
+                </p>
                 <p className="text-sm text-white/80">{product.description}</p>
-
                 <p className="text-xs text-white/40 mt-4">
                   Updated at:{" "}
                   {new Date(product.updated_at).toLocaleDateString("en-GB")}

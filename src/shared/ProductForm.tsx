@@ -53,7 +53,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     is_active: false,
     is_bestseller: false,
     is_featured: false,
-    is_on_sale: false,
+    // is_on_sale: false,
   });
 
   const [files, setFiles] = useState<File[]>([]);
@@ -82,7 +82,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         is_active: defaultValues?.is_active ?? false,
         is_bestseller: defaultValues?.is_bestseller ?? false,
         is_featured: defaultValues?.is_featured ?? false,
-        is_on_sale: defaultValues?.is_on_sale ?? false,
+        // is_on_sale: defaultValues?.is_on_sale ?? false,
       });
       setFiles([]);
       setPreviews([]);
@@ -212,7 +212,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       data.append("is_active", formData.is_active ? "true" : "false");
       data.append("is_bestseller", formData.is_bestseller ? "true" : "false");
       data.append("is_featured", formData.is_featured ? "true" : "false");
-      data.append("is_on_sale", formData.is_on_sale ? "true" : "false");
+      // data.append("is_on_sale", formData.is_on_sale ? "true" : "false");
       // formData.status.forEach((s, i) => {
       //   data.append(`status[${i}]`, s);
       // });
@@ -403,7 +403,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <label className="text-sm text-white/80">Is Featured</label>
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 name="is_on_sale"
@@ -412,7 +412,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 className="accent-blue-500"
               />
               <label className="text-sm text-white/80">Is OnSale</label>
-            </div>
+            </div> */}
 
             {/* Image Upload (only for add mode) */}
             {!isEditMode && (
