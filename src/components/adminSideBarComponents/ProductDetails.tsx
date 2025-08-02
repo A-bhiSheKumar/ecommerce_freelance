@@ -1,277 +1,362 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { api } from "../../utils/api";
-import {
-  NormalizedProduct,
-  Product,
-} from "../../interface/CategoriesInterface";
-import CategoryForm from "../../shared/CategoriesForm";
+import { Product } from "../../interface/ProductInterface";
+
 import toast from "react-hot-toast";
-import { SkeletonCard } from "../../shared/SkeletonCard";
-import { normalizeProduct } from "../../commanFuntion/normalizeProduct";
+import ProductForm from "../../shared/ProductForm";
 
-const EmptyState = ({ onAdd }: { onAdd: () => void }) => (
-  <div className="flex flex-col items-center justify-center text-center py-20">
-    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-      <span className="text-xl">🛍️</span>
-    </div>
-    <h3 className="text-xl font-semibold">No products found</h3>
-    <p className="text-sm text-white/60 mt-1 max-w-md">
-      You haven’t added any products yet. Create your first product to get
-      started.
-    </p>
-    <button
-      onClick={onAdd}
-      className="mt-6 inline-flex items-center gap-2 rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition"
-    >
-      <span className="text-sm font-medium">+ Add Product</span>
-    </button>
-  </div>
-);
+const ProductDetails = () => {
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  const categoryName = params.get("categoryName");
+  const categoryId = params.get("category");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-const ProductDetails: React.FC = () => {
-  const [products, setProducts] = useState<NormalizedProduct[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [editingCategory, setEditingCategory] =
-    useState<NormalizedProduct | null>(null);
-  const [fetchError, setFetchError] = useState<string>("");
-  const [search, setSearch] = useState<string>("");
-  const [openForm, setOpenForm] = useState(false);
+  const [modalImages, setModalImages] = useState<
+    | {
+        id: number;
+        image: string;
+        display_order: number;
+        alt_text: string;
+        is_main: boolean;
+      }[]
+    | null
+  >(null);
 
-  const fetchProducts = async () => {
+  const fetchByCategory = useCallback(async () => {
     try {
-      setFetchError("");
       setLoading(true);
-      const response = (await api.categories.getCategoryList()) as unknown;
-      const rawList: Product[] = Array.isArray(response)
-        ? (response as Product[])
-        : [];
-      const normalized = rawList.map(normalizeProduct);
-      setProducts(normalized);
-    } catch (error) {
-      console.error("Failed to fetch products", error);
-      setFetchError("Could not load products. Please try again.");
+      const allProducts = await api.product.getProductList(categoryId || "");
+      setProducts(allProducts);
+    } catch (err) {
+      console.error("Failed to load products by category:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryId]);
 
   useEffect(() => {
-    void fetchProducts();
-  }, []);
+    fetchByCategory();
+  }, [categoryName, fetchByCategory]);
 
-  const handleCreateCategory = async (formData: FormData) => {
-    try {
-      const response = await api.categories.addCategory(formData);
-      if (response) {
-        toast.success("Category added successfully! 🎉");
-        await fetchProducts();
-        setOpenForm(false);
-      }
-    } catch (error) {
-      toast.error("Failed to add category. Please try again.");
-      console.error(error);
-    }
-  };
-
-  const handleEditCategory = async (formData: FormData) => {
-    if (!editingCategory) return;
-    try {
-      const response = await api.categories.editCategory(
-        editingCategory.id,
-        formData
-      );
-      if (response) {
-        toast.success("Category updated successfully!");
-        await fetchProducts();
-        setOpenForm(false);
-        setEditingCategory(null);
-      }
-    } catch (error) {
-      toast.error("Failed to update category.");
-      console.error(error);
-    }
-  };
-
-  const handleDeleteCategory = async (id: string | number) => {
+  const handleDelete = async (productId: string) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this category?"
+      "Are you sure you want to delete this product?"
     );
     if (!confirmDelete) return;
 
     try {
-      const response = await api.categories.deleteCategory(id);
-      if (response) {
-        toast.success("Category deleted successfully!");
-        await fetchProducts();
-      }
+      await api.product.deleteProduct(productId);
+      setProducts((prev) => prev.filter((p) => p.id.toString() !== productId));
+      toast.success("Product deleted successfully!");
     } catch (error) {
-      toast.error("Failed to delete category.");
-      console.error(error);
+      console.error("Delete failed:", error);
+      toast.error("Failed to delete product. Try again.");
     }
   };
 
-  const filtered = useMemo<NormalizedProduct[]>(() => {
-    const q = search.trim().toLowerCase();
-
-    return products.filter((p) => {
-      const name = p.name.toLowerCase();
-      const cat = p.category.toLowerCase();
-      return q === "" || name.includes(q) || cat.includes(q);
-    });
-  }, [products, search]);
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0b0e22] to-[#0f1a4d] text-white">
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Category</h1>
-            <p className="text-sm text-white/60">
-              Manage your catalog and keep everything up to date.
-            </p>
-          </div>
+    <>
+      <div className="p-6 text-white relative">
+        <ProductForm
+          open={isFormOpen}
+          onClose={() => {
+            setIsFormOpen(false);
+            setEditingProduct(null); // reset edit mode on close
+          }}
+          defaultValues={
+            editingProduct
+              ? {
+                  name: editingProduct.name,
+                  description: editingProduct.description,
+                  category: categoryId ?? "",
+                  price: editingProduct.price.toString(),
+                }
+              : undefined
+          }
+          onSubmit={async (formData) => {
+            try {
+              if (editingProduct) {
+                // Update case
+                const updated = await api.product.editProduct(
+                  editingProduct.id,
+                  formData
+                );
+                setProducts((prev) =>
+                  prev.map((p) => (p.id === updated.id ? updated : p))
+                );
+                toast.success("Product updated successfully!");
+                await fetchByCategory();
+              } else {
+                // Add case
+                const response = await api.product.addProduct(formData);
+                setProducts((prev) => [...prev, response]);
+                toast.success("Product added successfully!");
+                await fetchByCategory();
+              }
+              setIsFormOpen(false);
+              setEditingProduct(null);
+            } catch (error) {
+              console.error("Error submitting product:", error);
+              toast.error("Failed to submit product.");
+            }
+          }}
+        />
+
+        {/* Header + Add Button */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold border-b border-white/10 pb-2">
+            Products in Category:{" "}
+            <span className="text-yellow-400">{categoryName}</span>
+          </h2>
           <button
-            onClick={() => setOpenForm(true)}
-            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition"
+            onClick={() => setIsFormOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-700"
           >
-            <span className="text-sm font-medium">+ Add Category</span>
+            + Add Product
           </button>
         </div>
 
-        {/* Toolbar */}
-        <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-4 mb-6">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative w-full md:w-80">
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by name or category…"
-                  className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-              <div className="hidden md:block text-sm text-white/60">
-                {filtered.length} result{filtered.length !== 1 ? "s" : ""}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="md:hidden text-sm text-white/60">
-                {filtered.length} result{filtered.length !== 1 ? "s" : ""}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* States */}
-        {fetchError && !loading && (
-          <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
-            <p className="text-sm">
-              {fetchError}{" "}
-              <button
-                onClick={fetchProducts}
-                className="underline underline-offset-2 hover:no-underline"
-              >
-                Retry
-              </button>
-            </p>
-          </div>
-        )}
-
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
-          </div>
-        ) : filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map((product) => {
-              return (
-                <div
-                  key={product.id}
-                  className="group rounded-xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/20 transition shadow-sm hover:shadow-md overflow-hidden"
-                >
-                  {/* Image / Placeholder */}
-                  <div className="h-40 w-full bg-white flex items-center justify-center">
+          <p className="text-white/60">Loading...</p>
+        ) : products.length === 0 ? (
+          <p className="text-white/60">No products found for this category.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <div
+                key={product.id}
+                className="bg-[#1c1f3a] rounded-xl shadow-md p-4 border border-white/10 hover:shadow-lg transition-all relative"
+              >
+                {/* Bottom-right action buttons */}
+                <div className="absolute bottom-2 right-2 flex gap-2">
+                  <button
+                    onClick={() => {
+                      setEditingProduct({ ...product, images: [] }); // strip out images
+                      setIsFormOpen(true);
+                    }}
+                    className="text-blue-500 hover:text-blue-700"
+                    title="Edit Product"
+                  >
+                    ✏️
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(product.id.toString())}
+                    className="text-red-500 hover:text-red-700"
+                    title="Delete Product"
+                  >
+                    🗑️
+                  </button>
+                </div>
+
+                {product.images?.[0]?.image && (
+                  <div className="relative">
                     <img
-                      src={product.image}
+                      src={product.images[0].image}
                       alt={product.name}
-                      className="max-h-full max-w-full object-contain"
+                      className="w-full h-48 object-contain bg-white/10 rounded-lg mb-4"
                     />
-                  </div>
 
-                  {/* Body */}
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-base font-semibold leading-tight line-clamp-1">
-                        {product.name}
-                      </h3>
-
-                      <div className="flex items-center gap-2">
+                    {product.images.length > 1 && (
+                      <>
+                        <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                          {product.images.length} Images
+                        </div>
                         <button
-                          onClick={() => {
-                            setEditingCategory(product);
-                            setOpenForm(true);
-                          }}
-                          className="text-green-200 font-bold"
-                          title="Edit"
+                          onClick={() =>
+                            setModalImages(
+                              product.images.map((img) => ({
+                                id: img.id,
+                                image: img.image,
+                                display_order: img.display_order,
+                                alt_text: img.alt_text,
+                                is_main: img.is_main,
+                              }))
+                            )
+                          }
+                          className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-1 rounded text-white"
                         >
-                          Edit
+                          View All
                         </button>
-
-                        <button
-                          onClick={() => handleDeleteCategory(product.id)}
-                          className="text-red-400"
-                          title="Delete"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-
-                    {product.description && (
-                      <p className="text-sm text-white/60 mt-1 line-clamp-2">
-                        {product.description}
-                      </p>
+                      </>
                     )}
                   </div>
+                )}
+
+                <h3 className="text-lg font-semibold mb-1">{product.name}</h3>
+
+                <div className="flex flex-wrap gap-2 mb-2 text-sm">
+                  {product.is_on_sale && (
+                    <span className="bg-red-600 px-2 py-0.5 rounded-full text-white">
+                      Sale
+                    </span>
+                  )}
+                  {product.is_bestseller && (
+                    <span className="bg-green-600 px-2 py-0.5 rounded-full text-white">
+                      Bestseller
+                    </span>
+                  )}
+                  {product.stock_quantity === 0 && (
+                    <span className="bg-gray-500 px-2 py-0.5 rounded-full text-white">
+                      Out of Stock
+                    </span>
+                  )}
                 </div>
-              );
-            })}
+
+                <p className="text-xl font-bold text-yellow-300 mb-1">
+                  ${product.current_price}
+                </p>
+                {product.sale_price && (
+                  <p className="text-sm line-through text-white/50">
+                    Original: ${product.price}
+                  </p>
+                )}
+                <p className="text-sm text-white/60">
+                  SKU: <span className="text-white">{product.sku}</span>
+                </p>
+                <p className="text-sm text-white/60 mb-2">
+                  Category:{" "}
+                  <span className="text-white">{product.category?.name}</span>
+                </p>
+
+                <p className="text-sm text-white/80">{product.description}</p>
+
+                <p className="text-xs text-white/40 mt-4">
+                  Updated at:{" "}
+                  {new Date(product.updated_at).toLocaleDateString("en-GB")}
+                </p>
+              </div>
+            ))}
           </div>
-        ) : (
-          !fetchError && <EmptyState onAdd={() => setOpenForm(true)} />
         )}
       </div>
+      {modalImages && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-[#1c1f3a] p-6 rounded-lg max-w-4xl w-full overflow-y-auto max-h-[90vh] relative">
+            <button
+              onClick={() => setModalImages(null)}
+              className="absolute top-2 right-2 text-white text-2xl hover:text-red-400"
+            >
+              ✖
+            </button>
+            <h3 className="text-xl font-bold mb-4 text-white">
+              Reorder Images{" "}
+              <span className="text-yellow-400">(drag & drop to arrange)</span>
+            </h3>
 
-      {/* Modal */}
-      <CategoryForm
-        open={openForm}
-        onClose={() => {
-          setOpenForm(false);
-          setEditingCategory(null);
-        }}
-        onSubmit={(formData) => {
-          if (editingCategory) {
-            formData.append("id", String(editingCategory.id)); // ✅ ensure it's a string
-            handleEditCategory(formData);
-          } else {
-            handleCreateCategory(formData);
-          }
-        }}
-        defaultValues={
-          editingCategory
-            ? {
-                name: editingCategory.name,
-                description: editingCategory.description ?? "",
-                imageUrl: editingCategory.image,
-              }
-            : undefined
-        }
-      />
-    </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {modalImages
+                .sort((a, b) => a.display_order - b.display_order)
+                .map((img, index) => (
+                  <div
+                    key={img.id}
+                    draggable
+                    onDragStart={(e) =>
+                      e.dataTransfer.setData("dragIndex", index.toString())
+                    }
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      const fromIndex = Number(
+                        e.dataTransfer.getData("dragIndex")
+                      );
+                      const toIndex = index;
+                      if (fromIndex === toIndex) return;
+
+                      setModalImages((prev) => {
+                        if (!prev) return prev;
+                        const updated = [...prev];
+                        const [moved] = updated.splice(fromIndex, 1);
+                        updated.splice(toIndex, 0, moved);
+
+                        return updated.map((img, idx) => ({
+                          ...img,
+                          display_order: idx,
+                        }));
+                      });
+                    }}
+                    className="bg-white/10 rounded p-2 text-center cursor-pointer"
+                  >
+                    <img
+                      src={img.image}
+                      alt={`Image ${index + 1}`}
+                      className="w-full h-40 object-contain mb-2 rounded"
+                    />
+
+                    <input
+                      type="text"
+                      value={img.alt_text}
+                      onChange={(e) =>
+                        setModalImages(
+                          (prev) =>
+                            prev?.map((imgObj, i) =>
+                              i === index
+                                ? { ...imgObj, alt_text: e.target.value }
+                                : imgObj
+                            ) || null
+                        )
+                      }
+                      placeholder="Alt text"
+                      className="w-full text-sm px-2 py-1 rounded mb-2 text-black"
+                    />
+
+                    <label className="flex items-center justify-center gap-2 text-sm text-white">
+                      <input
+                        type="radio"
+                        name="mainImage"
+                        checked={img.is_main}
+                        onChange={() =>
+                          setModalImages(
+                            (prev) =>
+                              prev?.map((imgObj) => ({
+                                ...imgObj,
+                                is_main: imgObj.id === img.id,
+                              })) || null
+                          )
+                        }
+                      />
+                      Set as Main Image
+                    </label>
+
+                    <p className="text-xs text-white/60 mt-1">
+                      Display Order: {img.display_order}
+                    </p>
+                  </div>
+                ))}
+            </div>
+
+            <button
+              onClick={async () => {
+                try {
+                  await api.product.updateImageDetails(
+                    modalImages.map(
+                      ({ id, display_order, alt_text, is_main }) => ({
+                        id,
+                        display_order,
+                        alt_text,
+                        is_main,
+                      })
+                    )
+                  );
+                  toast.success("Image order saved successfully!");
+                  setModalImages(null);
+                } catch (error) {
+                  console.error("Failed to update image order", error);
+                  toast.error("Failed to update image order.");
+                }
+              }}
+              className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

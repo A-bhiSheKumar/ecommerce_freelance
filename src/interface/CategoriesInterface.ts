@@ -1,4 +1,4 @@
-export interface Product {
+export interface ICategory {
   id?: string;
   _id?: string;
   slug?: string;

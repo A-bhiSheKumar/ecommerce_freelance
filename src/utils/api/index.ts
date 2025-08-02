@@ -1,9 +1,14 @@
 import { login } from "./auth/login";
 import { register } from "./auth/register";
-import { addCategory } from "./products/addCategory";
-import { deleteCategory } from "./products/deleteCategory";
-import { editCategory } from "./products/editCategory";
-import { getCategoryList } from "./products/getCategory";
+import { addCategory } from "./categories/addCategory";
+import { deleteCategory } from "./categories/deleteCategory";
+import { editCategory } from "./categories/editCategory";
+import { getCategoryList } from "./categories/getCategory";
+import { addProduct } from "./products/addProducts";
+import { deleteProduct } from "./products/deleteProducts";
+import { editProduct } from "./products/editProducts";
+import { getProductList } from "./products/getProductsList";
+import { updateImageDetails } from "./products/imageDetailsUpdate";
 
 export const api = {
   auth: {
@@ -15,5 +20,12 @@ export const api = {
     addCategory: addCategory,
     editCategory: editCategory,
     deleteCategory: deleteCategory,
+  },
+  product: {
+    getProductList: getProductList,
+    deleteProduct: deleteProduct,
+    editProduct: editProduct,
+    addProduct: addProduct,
+    updateImageDetails: updateImageDetails,
   },
 };

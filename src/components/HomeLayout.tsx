@@ -4,6 +4,8 @@ import DashboardHome from "./adminSideBarComponents/DashboardHome";
 import ViewCotation from "./adminSideBarComponents/ViewCotation";
 import ManagaeProfile from "./adminSideBarComponents/ManagaeProfile";
 import AddUser from "./adminSideBarComponents/ManageUser";
+
+import CategoryDetails from "./adminSideBarComponents/CategoryDetails";
 import ProductDetails from "./adminSideBarComponents/ProductDetails";
 
 const HomeLayout = () => {
@@ -22,7 +24,8 @@ const HomeLayout = () => {
         <Routes>
           <Route path="dashboard" element={<DashboardHome />} />
           <Route path="add-user" element={<AddUser />} />
-          <Route path="category-details" element={<ProductDetails />} />
+          <Route path="category-details" element={<CategoryDetails />} />
+          <Route path="product" element={<ProductDetails />} />
           <Route path="view-cotation" element={<ViewCotation />} />
           <Route path="manage-profile" element={<ManagaeProfile />} />
           {/* Default route */}

@@ -1,6 +1,9 @@
-import { NormalizedProduct, Product } from "../interface/CategoriesInterface";
+import { NormalizedProduct, ICategory } from "../interface/CategoriesInterface";
 
-export function normalizeProduct(p: Product, index: number): NormalizedProduct {
+export function normalizeProduct(
+  p: ICategory,
+  index: number
+): NormalizedProduct {
   const id =
     (typeof p.id === "number" || typeof p.id === "string"
       ? String(p.id)
