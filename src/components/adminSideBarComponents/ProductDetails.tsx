@@ -73,8 +73,18 @@ const ProductDetails = () => {
               ? {
                   name: editingProduct.name,
                   description: editingProduct.description,
-                  category: categoryId ?? "",
-                  price: editingProduct.price.toString(),
+                  category: editingProduct.category?.id || categoryId || "",
+                  price: editingProduct.price?.toString() || "",
+                  short_description: editingProduct.short_description || "",
+                  sale_price: editingProduct.sale_price?.toString() || "",
+                  stock_quantity:
+                    editingProduct.stock_quantity?.toString() || "",
+                  status: editingProduct.status || [],
+                  meta_description: editingProduct.meta_description || "",
+                  meta_title: editingProduct.meta_title || "",
+                  is_active: editingProduct.is_active ?? false,
+                  is_bestseller: editingProduct.is_bestseller ?? false,
+                  is_featured: editingProduct.is_featured ?? false,
                 }
               : undefined
           }
@@ -191,16 +201,6 @@ const ProductDetails = () => {
                 <h3 className="text-lg font-semibold mb-1">{product.name}</h3>
 
                 <div className="flex flex-wrap gap-2 mb-2 text-sm">
-                  {product.is_on_sale && (
-                    <span className="bg-red-600 px-2 py-0.5 rounded-full text-white">
-                      Sale
-                    </span>
-                  )}
-                  {product.is_bestseller && (
-                    <span className="bg-green-600 px-2 py-0.5 rounded-full text-white">
-                      Bestseller
-                    </span>
-                  )}
                   {product.stock_quantity === 0 && (
                     <span className="bg-gray-500 px-2 py-0.5 rounded-full text-white">
                       Out of Stock
@@ -209,11 +209,11 @@ const ProductDetails = () => {
                 </div>
 
                 <p className="text-xl font-bold text-yellow-300 mb-1">
-                  ${product.current_price}
+                  ${product.sale_price}
                 </p>
                 {product.sale_price && (
                   <p className="text-sm line-through text-white/50">
-                    Original: ${product.price}
+                    OriginalPrice: ${product.price}
                   </p>
                 )}
                 <p className="text-sm text-white/60">
@@ -230,6 +230,28 @@ const ProductDetails = () => {
                   Updated at:{" "}
                   {new Date(product.updated_at).toLocaleDateString("en-GB")}
                 </p>
+                <div className="flex flex-wrap gap-2 text-xs mt-2">
+                  {product.is_active && (
+                    <span className="bg-green-600 text-white px-2 py-0.5 rounded-full">
+                      Active
+                    </span>
+                  )}
+                  {product.is_bestseller && (
+                    <span className="bg-yellow-600 text-white px-2 py-0.5 rounded-full">
+                      Bestseller
+                    </span>
+                  )}
+                  {product.is_featured && (
+                    <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full">
+                      Featured
+                    </span>
+                  )}
+                  {product.is_on_sale && (
+                    <span className="bg-pink-600 text-white px-2 py-0.5 rounded-full">
+                      On Sale
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -343,6 +365,7 @@ const ProductDetails = () => {
                     )
                   );
                   toast.success("Image order saved successfully!");
+                  await fetchByCategory();
                   setModalImages(null);
                 } catch (error) {
                   console.error("Failed to update image order", error);
@@ -351,7 +374,7 @@ const ProductDetails = () => {
               }}
               className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
             >
-              Save
+              Save Changes
             </button>
           </div>
         </div>

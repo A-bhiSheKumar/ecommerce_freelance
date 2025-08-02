@@ -19,26 +19,22 @@ export interface ProductCategory {
 export interface Product {
   id: number;
   name: string;
-  slug: string;
-  sku: string;
   description: string;
-  short_description: string;
-  price: string;
-  current_price: string;
-  sale_price: string | null;
-  is_on_sale: boolean;
-  is_featured: boolean;
-  is_bestseller: boolean;
-  status: string;
-  stock_quantity: number;
-  weight: string | null;
-  created_at: string;
-  updated_at: string;
-  meta_title: string;
-  meta_description: string;
-  category: ProductCategory;
+  category: { id: string; name: string };
+  price: number;
+  short_description?: string;
+  sale_price?: number;
+  stock_quantity?: number;
+  status?: string[];
+  meta_description?: string;
+  meta_title?: string;
+  is_active?: boolean;
+  is_bestseller?: boolean;
+  is_featured?: boolean;
   images: ProductImage[];
-  attributes: ProductAttribute[];
+  updated_at: string;
+  sku: string;
+  is_on_sale?: boolean;
 }
 
 // Attributes (if your API supports filtering by size/color/etc.)
