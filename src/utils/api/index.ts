@@ -4,11 +4,13 @@ import { addCategory } from "./categories/addCategory";
 import { deleteCategory } from "./categories/deleteCategory";
 import { editCategory } from "./categories/editCategory";
 import { getCategoryList } from "./categories/getCategory";
+import { addProductImg } from "./products/addProductImg";
 import { addProduct } from "./products/addProducts";
 import { deleteProduct } from "./products/deleteProducts";
 import { editProduct } from "./products/editProducts";
 import { getProductList } from "./products/getProductsList";
 import { updateImageDetails } from "./products/imageDetailsUpdate";
+import { updateProductImg } from "./products/updateProductImg";
 
 export const api = {
   auth: {
@@ -27,5 +29,7 @@ export const api = {
     editProduct: editProduct,
     addProduct: addProduct,
     updateImageDetails: updateImageDetails,
+    addProductImg: addProductImg,
+    updateProductImg: updateProductImg,
   },
 };

@@ -15,6 +15,10 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(
+    null
+  );
+  // const [selectedImageIds, setSelectedImageIds] = useState<number[]>([]);
 
   const [modalImages, setModalImages] = useState<
     | {
@@ -172,13 +176,13 @@ const ProductDetails = () => {
                       className="w-full h-48 object-contain bg-white/10 rounded-lg mb-4"
                     />
 
-                    {product.images.length > 1 && (
+                    {product.images.length >= 1 && (
                       <>
                         <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
                           {product.images.length} Images
                         </div>
                         <button
-                          onClick={() =>
+                          onClick={() => {
                             setModalImages(
                               product.images.map((img) => ({
                                 id: img.id,
@@ -187,8 +191,12 @@ const ProductDetails = () => {
                                 alt_text: img.alt_text,
                                 is_main: img.is_main,
                               }))
-                            )
-                          }
+                            );
+                            setSelectedProductId(product.id);
+                            // setSelectedImageIds(
+                            //   product.images.map((img) => img.id)
+                            // );
+                          }}
                           className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-1 rounded text-white"
                         >
                           View All
@@ -314,11 +322,63 @@ const ProductDetails = () => {
                     }}
                     className="bg-white/10 rounded p-2 text-center cursor-pointer"
                   >
-                    <img
-                      src={img.image}
-                      alt={`Image ${index + 1}`}
-                      className="w-full h-40 object-contain mb-2 rounded"
-                    />
+                    <div className="relative">
+                      <img
+                        src={img.image}
+                        alt={`Image ${index + 1}`}
+                        className="w-full h-40 object-contain mb-2 rounded"
+                      />
+
+                      {/* ✏️ Edit Icon */}
+                      <label
+                        htmlFor={`replace-${img.id}`}
+                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 hover:bg-black/80 text-white cursor-pointer transition-colors"
+                        title="Replace Image"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                      </label>
+
+                      <input
+                        id={`replace-${img.id}`}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const formData = new FormData();
+                          formData.append("image", file); // note: 'image' must match backend's expected field
+
+                          try {
+                            const updated = await api.product.updateProductImg(
+                              img.id.toString(),
+                              formData
+                            );
+                            toast.success("Image updated!");
+
+                            // Replace the image URL in modalImages
+                            setModalImages(
+                              (prev) =>
+                                prev?.map((imgObj) =>
+                                  imgObj.id === img.id
+                                    ? { ...imgObj, image: updated.image }
+                                    : imgObj
+                                ) || null
+                            );
+                          } catch (error) {
+                            console.error("Failed to replace image:", error);
+                            toast.error("Failed to update image.");
+                          }
+                        }}
+                      />
+                    </div>
 
                     <input
                       type="text"
@@ -361,6 +421,62 @@ const ProductDetails = () => {
                   </div>
                 ))}
             </div>
+
+            {modalImages.length < 5 && (
+              <div className="col-span-full flex justify-center mt-6">
+                <label
+                  className="relative inline-block px-6 py-3 rounded-full cursor-pointer bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600
+ text-white text-sm font-semibold shadow-lg hover:scale-105 transition-transform duration-300"
+                >
+                  ➕ Add Image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || !modalImages?.length) return;
+
+                      try {
+                        const formData = new FormData();
+                        formData.append("images", file);
+                        const productId = selectedProductId;
+                        if (!productId) {
+                          toast.error("Product ID not found.");
+                          return;
+                        }
+
+                        const response = await api.product.addProductImg(
+                          formData,
+                          productId.toString()
+                        );
+                        console.log("Uploaded image response:", response);
+                        // ✅ Update modalImages immediately to show the image without needing re-fetch
+                        setModalImages((prev) =>
+                          prev
+                            ? [
+                                ...prev.map((img) => ({ ...img })),
+                                {
+                                  id: response.id,
+                                  image: response.image,
+                                  display_order: prev.length,
+                                  alt_text: response.alt_text || "",
+                                  is_main: false,
+                                },
+                              ]
+                            : null
+                        );
+
+                        toast.success("Image added!");
+                      } catch (error) {
+                        console.error("Failed to add image:", error);
+                        toast.error("Failed to upload image.");
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+            )}
 
             <button
               onClick={async () => {
