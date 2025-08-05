@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { url, version } from "../../config/config";
 import { Endpoint, Headers, Params, Payload } from "../../types/api/api.types";
+import { logoutUser } from "../../commanFuntion/logoutUser";
 
 const get = async (
   endpoint: Endpoint,
@@ -17,7 +18,10 @@ const get = async (
     if (status === 200) {
       return response;
     }
-  } catch (error) {
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      logoutUser();
+    }
     console.log("error", error);
     throw error;
   }
@@ -36,7 +40,10 @@ const post = async (endpoint: Endpoint, payload: Payload, headers: Headers) => {
     if (status === 200 || status === 201) {
       return response;
     }
-  } catch (error) {
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      logoutUser();
+    }
     console.log("error", error);
     throw error;
   }
@@ -55,7 +62,10 @@ const put = async (endpoint: Endpoint, payload: Payload, headers: Headers) => {
     if (status === 200) {
       return response;
     }
-  } catch (error) {
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      logoutUser();
+    }
     console.log("error", error);
     throw error;
   }
@@ -78,7 +88,10 @@ const patch = async (
     if (status === 200) {
       return response;
     }
-  } catch (error) {
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      logoutUser();
+    }
     console.log("error", error);
     throw error;
   }

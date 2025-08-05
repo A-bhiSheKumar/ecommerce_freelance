@@ -31,7 +31,11 @@ const LoginForm = () => {
         localStorage.setItem("username", response.username);
         localStorage.setItem("email", response.email);
 
-        navigate("/home");
+        if (response.role === "ADMIN") {
+          navigate("/home");
+        } else {
+          window.location.href = "https://kalida-ecommerce.vercel.app/";
+        }
       } else {
         toast.error("Invalid credentials");
       }
