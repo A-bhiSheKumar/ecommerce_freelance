@@ -26,7 +26,7 @@ const HomeLayout = () => {
           <Route path="add-user" element={<AddUser />} />
           <Route path="category-details" element={<CategoryDetails />} />
           <Route path="product" element={<ProductDetails />} />
-          <Route path="view-cotation" element={<ViewCotation />} />
+          <Route path="view-quotation" element={<ViewCotation />} />
           <Route path="manage-profile" element={<ManagaeProfile />} />
           {/* Default route */}
           <Route index element={<DashboardHome />} />

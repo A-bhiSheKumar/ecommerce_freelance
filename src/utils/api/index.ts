@@ -11,6 +11,7 @@ import { editProduct } from "./products/editProducts";
 import { getProductList } from "./products/getProductsList";
 import { updateImageDetails } from "./products/imageDetailsUpdate";
 import { updateProductImg } from "./products/updateProductImg";
+import { getQuotations } from "./quotation/getQuotations";
 
 export const api = {
   auth: {
@@ -31,5 +32,8 @@ export const api = {
     updateImageDetails: updateImageDetails,
     addProductImg: addProductImg,
     updateProductImg: updateProductImg,
+  },
+  quotations: {
+    getQuotations: getQuotations,
   },
 };
