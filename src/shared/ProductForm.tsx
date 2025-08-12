@@ -14,6 +14,7 @@ export interface ProductFormProps {
     sale_price?: string;
     current_price?: string;
     stock_quantity?: string;
+    ref_number?: string;
     status?: string[];
     meta_description?: string;
     meta_title?: string;
@@ -45,7 +46,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     price: "",
     short_description: "",
     sale_price: "",
-
+    ref_number: "",
     stock_quantity: "",
     status: [] as string[],
     meta_description: "",
@@ -74,7 +75,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         price: defaultValues?.price || "",
         short_description: defaultValues?.short_description || "",
         sale_price: defaultValues?.sale_price || "",
-
+        ref_number: defaultValues?.ref_number || "",
         stock_quantity: defaultValues?.stock_quantity || "",
         status: defaultValues?.status || [],
         meta_description: defaultValues?.meta_description || "",
@@ -321,6 +322,19 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </div>
 
             <div>
+              <label className="text-sm text-white/80">Refrence Number</label>
+              <input
+                type="number"
+                step="o"
+                name="ref_number"
+                value={formData.ref_number}
+                onChange={handleChange}
+                className="w-full mt-1 p-2 rounded bg-black/20 border border-white/10"
+                required
+              />
+            </div>
+
+            {/* <div>
               <label className="text-sm text-white/80">Stock Quanity</label>
               <input
                 type="number"
@@ -331,7 +345,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 className="w-full mt-1 p-2 rounded bg-black/20 border border-white/10"
                 required
               />
-            </div>
+            </div> */}
 
             {/* Short Description */}
             <div>
@@ -450,7 +464,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     )}
                   </div>
                   <div className="text-xs text-white/60">
-                    PNG, JPG, or WebP up to {MAX_MB}MB each
+                    PNG, JPG, or gif up to {MAX_MB}MB each
                   </div>
                 </label>
 

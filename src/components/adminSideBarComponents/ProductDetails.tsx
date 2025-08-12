@@ -208,22 +208,22 @@ const ProductDetails = () => {
 
                 <h3 className="text-lg font-semibold mb-1">{product.name}</h3>
 
-                <div className="flex flex-wrap gap-2 mb-2 text-sm">
+                {/* <div className="flex flex-wrap gap-2 mb-2 text-sm">
                   {product.stock_quantity === 0 && (
                     <span className="bg-gray-500 px-2 py-0.5 rounded-full text-white">
                       Out of Stock
                     </span>
                   )}
-                </div>
+                </div> */}
 
                 <p className="text-xl font-bold text-yellow-300 mb-1">
                   ${product.sale_price}
                 </p>
-                {product.sale_price && (
+                {/* {product.sale_price && (
                   <p className="text-sm line-through text-white/50">
                     OriginalPrice: ${product.price}
                   </p>
-                )}
+                )} */}
                 <p className="text-sm text-white/60">
                   SKU: <span className="text-white">{product.sku}</span>
                 </p>
@@ -231,10 +231,10 @@ const ProductDetails = () => {
                   Category:{" "}
                   <span className="text-white">{product.category?.name}</span>
                 </p>
-                <p className="text-sm text-white/60">
+                {/* <p className="text-sm text-white/60">
                   Stock Quantity:{" "}
                   <span className="text-white">{product.stock_quantity}</span>
-                </p>
+                </p> */}
                 <p className="text-sm text-white/60">
                   Meta Title:{" "}
                   <span className="text-white">{product.meta_title}</span>
