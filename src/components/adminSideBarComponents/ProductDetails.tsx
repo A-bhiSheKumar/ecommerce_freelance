@@ -225,6 +225,10 @@ const ProductDetails = () => {
                   </p>
                 )} */}
                 <p className="text-sm text-white/60">
+                  Reference Number:{" "}
+                  <span className="text-white">{product.ref_number}</span>
+                </p>
+                <p className="text-sm text-white/60">
                   SKU: <span className="text-white">{product.sku}</span>
                 </p>
                 <p className="text-sm text-white/60 mb-2">

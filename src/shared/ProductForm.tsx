@@ -322,7 +322,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </div>
 
             <div>
-              <label className="text-sm text-white/80">Refrence Number</label>
+              <label className="text-sm text-white/80">Reference Number</label>
               <input
                 type="number"
                 step="o"
