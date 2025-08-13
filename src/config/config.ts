@@ -2,7 +2,7 @@ import Cookies from "js-cookie";
 
 const csrftoken = Cookies.get("csrftoken");
 
-export const url = "https://kalida.duckdns.org";
+export const url = "https://kalida.preetipramanik.com";
 // zip -r app.zip dist package.json package-lock.json node_modules
 export const port = "4000";
 export const version = "v1";
