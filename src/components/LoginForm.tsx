@@ -37,7 +37,7 @@ const LoginForm = () => {
         if (response.role === "ADMIN") {
           navigate("/home");
         } else {
-          // Redirect to kalida site with token
+          // Redirect to kalida site with access_token
           localStorage.clear();
           window.location.href = `https://kalida-ecommerce.vercel.app?token=${accessToken}`;
         }
