@@ -18,6 +18,7 @@ const ProductDetails = () => {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(
     null
   );
+  const [isUploading, setIsUploading] = useState(false);
   // const [selectedImageIds, setSelectedImageIds] = useState<number[]>([]);
 
   const [modalImages, setModalImages] = useState<
@@ -216,9 +217,9 @@ const ProductDetails = () => {
                   )}
                 </div> */}
 
-                <p className="text-xl font-bold text-yellow-300 mb-1">
+                {/* <p className="text-xl font-bold text-yellow-300 mb-1">
                   ${product.sale_price}
-                </p>
+                </p> */}
                 {/* {product.sale_price && (
                   <p className="text-sm line-through text-white/50">
                     OriginalPrice: ${product.price}
@@ -432,7 +433,7 @@ const ProductDetails = () => {
                   className="relative inline-block px-6 py-3 rounded-full cursor-pointer bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600
  text-white text-sm font-semibold shadow-lg hover:scale-105 transition-transform duration-300"
                 >
-                  ➕ Add Image
+                  {isUploading ? "Uploading..." : "➕ Add Image"}
                   <input
                     type="file"
                     accept="image/*"
@@ -440,7 +441,7 @@ const ProductDetails = () => {
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file || !modalImages?.length) return;
-
+                      setIsUploading(true);
                       try {
                         const formData = new FormData();
                         formData.append("images", file);
@@ -456,25 +457,37 @@ const ProductDetails = () => {
                         );
                         console.log("Uploaded image response:", response);
                         // ✅ Update modalImages immediately to show the image without needing re-fetch
-                        setModalImages((prev) =>
-                          prev
-                            ? [
-                                ...prev.map((img) => ({ ...img })),
-                                {
-                                  id: response.id,
-                                  image: response.image,
-                                  display_order: prev.length,
-                                  alt_text: response.alt_text || "",
-                                  is_main: false,
-                                },
-                              ]
-                            : null
-                        );
+                        // setModalImages((prev) =>
+                        //   prev
+                        //     ? [
+                        //         ...prev.map((img) => ({ ...img })),
+                        //         {
+                        //           id: response.id,
+                        //           image: response.image,
+                        //           display_order: prev.length,
+                        //           alt_text: response.alt_text || "",
+                        //           is_main: false,
+                        //         },
+                        //       ]
+                        //     : null
+                        // );
+                        setModalImages((prev) => [
+                          ...(prev || []),
+                          {
+                            id: response.images[0].id, // match your API shape
+                            image: response.images[0].image,
+                            display_order: prev?.length || 0,
+                            alt_text: response.images[0].alt_text || "",
+                            is_main: false,
+                          },
+                        ]);
 
                         toast.success("Image added!");
                       } catch (error) {
                         console.error("Failed to add image:", error);
                         toast.error("Failed to upload image.");
+                      } finally {
+                        setIsUploading(false);
                       }
                     }}
                   />

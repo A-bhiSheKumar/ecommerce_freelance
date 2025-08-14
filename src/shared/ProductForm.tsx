@@ -198,7 +198,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
       !formData.name.trim() ||
       !formData.description.trim() ||
       !formData.category_id ||
-      !formData.price ||
       !formData.ref_number
     ) {
       setError("All fields are required");
@@ -309,7 +308,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </div>
 
             {/* Price */}
-            <div>
+            {/* <div>
               <label className="text-sm text-white/80">Price</label>
               <input
                 type="number"
@@ -320,9 +319,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 className="w-full mt-1 p-2 rounded bg-black/20 border border-white/10"
                 required
               />
-            </div>
+            </div> */}
 
-            <div>
+            {/* <div>
               <label className="text-sm text-white/80">Sale Price</label>
               <input
                 type="number"
@@ -333,7 +332,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 className="w-full mt-1 p-2 rounded bg-black/20 border border-white/10"
                 required
               />
-            </div>
+            </div> */}
 
             <div>
               <label className="text-sm text-white/80">Reference Number</label>
