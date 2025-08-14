@@ -16,7 +16,13 @@ type CategoryFormProps = {
 };
 
 const MAX_MB = 5;
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+const ACCEPTED_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/jpg",
+  "image/gif",
+];
 
 const CategoryForm: React.FC<CategoryFormProps> = ({
   open,
@@ -60,7 +66,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
 
   const validateFile = (f: File) => {
     if (!ACCEPTED_TYPES.includes(f.type)) {
-      return "Only JPG, PNG, or WebP images are allowed.";
+      return "Only JPG, PNG, Gif or WebP images are allowed.";
     }
     if (f.size > MAX_MB * 1024 * 1024) {
       return `File too large. Max ${MAX_MB}MB.`;
@@ -193,7 +199,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
                 <span className="underline">browse</span>
               </div>
               <div className="text-xs text-white/60">
-                PNG, JPG, or WebP up to {MAX_MB}MB
+                PNG, JPG, Gif or WebP up to {MAX_MB}MB
               </div>
             </label>
 

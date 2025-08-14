@@ -25,8 +25,14 @@ export interface ProductFormProps {
   } | null;
 }
 
-const MAX_MB = 5;
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+const MAX_MB = 10;
+const ACCEPTED_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/jpg",
+  "image/gif",
+];
 const MAX_IMAGES = 5;
 
 const ProductForm: React.FC<ProductFormProps> = ({
@@ -102,7 +108,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   const validateFile = (file: File): string | null => {
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      return "Only JPG, PNG, or WebP images are allowed.";
+      return "Only JPG, PNG, Gif or WebP images are allowed.";
     }
     if (file.size > MAX_MB * 1024 * 1024) {
       return `File too large. Max ${MAX_MB}MB.`;
@@ -141,7 +147,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
     setError("");
     setFiles((prev) => [...prev, ...validFiles]);
-    setPreviews((prev) => [...prev, ...newPreviews]);
+    // setPreviews((prev) => [...prev, ...newPreviews]);
+    setPreviews((prev) => {
+      prev.forEach((url) => {
+        if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+      });
+      return newPreviews;
+    });
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -186,7 +198,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
       !formData.name.trim() ||
       !formData.description.trim() ||
       !formData.category_id ||
-      !formData.price
+      !formData.price ||
+      !formData.ref_number
     ) {
       setError("All fields are required");
       return;
@@ -205,6 +218,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       data.append("description", formData.description.trim());
       data.append("category_id", formData.category_id);
       data.append("price", formData.price);
+      data.append("ref_number", formData.ref_number);
       data.append("short_description", formData.short_description);
       data.append("sale_price", formData.sale_price);
       data.append("stock_quantity", formData.stock_quantity);
@@ -448,10 +462,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => handleFiles(e.target.files)}
+                    onChange={(e) => {
+                      handleFiles(e.target.files);
+                      e.target.value = ""; // reset input so same file works next time
+                    }}
                     multiple
                     disabled={files.length >= MAX_IMAGES}
                   />
+
                   <div className="text-2xl">📷</div>
                   <div className="text-sm">
                     {files.length < MAX_IMAGES ? (
