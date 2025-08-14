@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../utils/api";
 import toast from "react-hot-toast";
 
 const LoginForm = () => {
-  const [isSignup, setIsSignup] = useState(false); // toggle form
+  const [isSignup, setIsSignup] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +24,10 @@ const LoginForm = () => {
       if (response) {
         toast.success("Login successful!");
         console.log("Login successful:", response);
-        localStorage.setItem("access_token", response.access);
+
+        const accessToken = response.access;
+
+        localStorage.setItem("access_token", accessToken);
         localStorage.setItem("refresh_token", response.refresh);
         localStorage.setItem("user_id", response.user_id.toString());
         localStorage.setItem("role", response.role);
@@ -34,7 +37,9 @@ const LoginForm = () => {
         if (response.role === "ADMIN") {
           navigate("/home");
         } else {
-          window.location.href = "https://kalida-ecommerce.vercel.app/";
+          // Redirect to kalida site with token
+          localStorage.clear();
+          window.location.href = `https://kalida-ecommerce.vercel.app?token=${accessToken}`;
         }
       } else {
         toast.error("Invalid credentials");
@@ -52,7 +57,7 @@ const LoginForm = () => {
       setLoading(true);
       const payload = {
         username,
-        email: email,
+        email,
         password,
         role,
         phone_number: phoneNumber,
@@ -63,8 +68,6 @@ const LoginForm = () => {
 
       if (response) {
         toast.success("Signup successful. Please log in.");
-
-        // Autofill login form with credentials
         setIsSignup(false);
       } else {
         toast.error("Signup failed.");
@@ -76,13 +79,6 @@ const LoginForm = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      navigate("/home");
-    }
-  }, []);
 
   return (
     <div className="min-h-screen flex">
@@ -109,7 +105,7 @@ const LoginForm = () => {
         <div className="w-full max-w-md space-y-6">
           <div>
             <p className="text-sm text-white text-opacity-60">
-              {isSignup ? "New to Organization?" : "Login your account"}
+              {isSignup ? "New to Organization?" : "Login to your account"}
             </p>
             <h2 className="text-3xl font-bold text-white">
               {isSignup ? "Create Account" : "Welcome Back!"}
@@ -200,8 +196,6 @@ const LoginForm = () => {
                 </div>
               </>
             )}
-
-            {!isSignup && <div className="text-right"></div>}
 
             <button
               onClick={isSignup ? handleSignup : handleLogin}
