@@ -39,7 +39,7 @@ const LoginForm = () => {
         } else {
           // Redirect to kalida site with access_token
           localStorage.clear();
-          window.location.href = `https://kalida-ecommerce.vercel.app?token=${accessToken}`;
+          window.location.href = `https://kalida-ecommerce.vercel.app/?token=${accessToken}`;
         }
       } else {
         toast.error("Invalid credentials");
