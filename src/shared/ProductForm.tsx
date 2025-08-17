@@ -337,7 +337,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
             <div>
               <label className="text-sm text-white/80">Reference Number</label>
               <input
-                type="number"
+                type="string"
                 step="o"
                 name="ref_number"
                 value={formData.ref_number}
