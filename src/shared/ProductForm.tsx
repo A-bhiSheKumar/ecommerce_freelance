@@ -124,7 +124,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     let errorMsg = "";
 
     Array.from(newFiles)
-      .slice(0, MAX_IMAGES - files.length)
+      .slice(0, MAX_IMAGES - files.length) // enforce max
       .forEach((file) => {
         const error = validateFile(file);
         if (error) {
@@ -146,14 +146,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
     }
 
     setError("");
-    setFiles((prev) => [...prev, ...validFiles]);
-    // setPreviews((prev) => [...prev, ...newPreviews]);
-    setPreviews((prev) => {
-      prev.forEach((url) => {
-        if (url.startsWith("blob:")) URL.revokeObjectURL(url);
-      });
-      return newPreviews;
-    });
+    setFiles((prev) => [...prev, ...validFiles]); // ✅ append new files
+    setPreviews((prev) => [...prev, ...newPreviews]); // ✅ append previews
   };
 
   const handleDrop = (e: React.DragEvent) => {

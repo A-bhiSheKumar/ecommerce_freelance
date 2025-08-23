@@ -34,7 +34,7 @@ export interface Product {
   images: ProductImage[];
   updated_at: string;
   sku: string;
-  ref_number?: number;
+  ref_number?: string;
   is_on_sale?: boolean;
 }
 

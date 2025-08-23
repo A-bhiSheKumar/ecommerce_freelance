@@ -82,6 +82,7 @@ const ProductDetails = () => {
                   price: editingProduct.price?.toString() || "",
                   short_description: editingProduct.short_description || "",
                   sale_price: editingProduct.sale_price?.toString() || "",
+                  ref_number: editingProduct?.ref_number || "",
                   stock_quantity:
                     editingProduct.stock_quantity?.toString() || "",
                   status: editingProduct.status || [],
