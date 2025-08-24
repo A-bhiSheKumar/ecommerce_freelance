@@ -15,6 +15,10 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [uploadingImages, setUploadingImages] = useState<{
+    [id: number]: boolean;
+  }>({});
+
   const [selectedProductId, setSelectedProductId] = useState<number | null>(
     null
   );
@@ -299,133 +303,135 @@ const ProductDetails = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {modalImages
                 .sort((a, b) => a.display_order - b.display_order)
-                .map((img, index) => (
-                  <div
-                    key={img.id}
-                    draggable
-                    onDragStart={(e) =>
-                      e.dataTransfer.setData("dragIndex", index.toString())
-                    }
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      const fromIndex = Number(
-                        e.dataTransfer.getData("dragIndex")
-                      );
-                      const toIndex = index;
-                      if (fromIndex === toIndex) return;
-
-                      setModalImages((prev) => {
-                        if (!prev) return prev;
-                        const updated = [...prev];
-                        const [moved] = updated.splice(fromIndex, 1);
-                        updated.splice(toIndex, 0, moved);
-
-                        return updated.map((img, idx) => ({
-                          ...img,
-                          display_order: idx,
-                        }));
-                      });
-                    }}
-                    className="bg-white/10 rounded p-2 text-center cursor-pointer"
-                  >
-                    <div className="relative">
-                      <img
-                        src={img.image}
-                        alt={`Image ${index + 1}`}
-                        className="w-full h-40 object-contain mb-2 rounded"
-                      />
-
-                      {/* ✏️ Edit Icon */}
-                      <label
-                        htmlFor={`replace-${img.id}`}
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 hover:bg-black/80 text-white cursor-pointer transition-colors"
-                        title="Replace Image"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                      </label>
-
-                      <input
-                        id={`replace-${img.id}`}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          const formData = new FormData();
-                          formData.append("image", file); // note: 'image' must match backend's expected field
-
-                          try {
-                            const updated = await api.product.updateProductImg(
-                              img.id.toString(),
-                              formData
-                            );
-                            toast.success("Image updated!");
-
-                            // Replace the image URL in modalImages
-                            setModalImages(
-                              (prev) =>
-                                prev?.map((imgObj) =>
-                                  imgObj.id === img.id
-                                    ? { ...imgObj, image: updated.image }
-                                    : imgObj
-                                ) || null
-                            );
-                          } catch (error) {
-                            console.error("Failed to replace image:", error);
-                            toast.error("Failed to update image.");
-                          }
-                        }}
-                      />
-                    </div>
-
-                    <input
-                      type="text"
-                      value={img.alt_text}
-                      onChange={(e) =>
-                        setModalImages(
-                          (prev) =>
-                            prev?.map((imgObj, i) =>
-                              i === index
-                                ? { ...imgObj, alt_text: e.target.value }
-                                : imgObj
-                            ) || null
-                        )
+                .map((img, index) => {
+                  const isReplacing = uploadingImages[img.id] || false;
+                  return (
+                    <div
+                      key={img.id}
+                      draggable
+                      onDragStart={(e) =>
+                        e.dataTransfer.setData("dragIndex", index.toString())
                       }
-                      placeholder="Alt text"
-                      className="w-full text-sm px-2 py-1 rounded mb-2 text-black"
-                    />
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        const fromIndex = Number(
+                          e.dataTransfer.getData("dragIndex")
+                        );
+                        const toIndex = index;
+                        if (fromIndex === toIndex) return;
 
-                    <label className="flex items-center justify-center gap-2 text-sm text-white">
-                      <input
-                        type="radio"
-                        name="mainImage"
-                        checked={img.is_main}
-                        onChange={() =>
-                          setModalImages(
-                            (prev) =>
-                              prev?.map((imgObj) => ({
-                                ...imgObj,
-                                is_main: imgObj.id === img.id,
-                              })) || null
-                          )
-                        }
-                      />
-                      Set as Main Image
-                    </label>
+                        setModalImages((prev) => {
+                          if (!prev) return prev;
+                          const updated = [...prev];
+                          const [moved] = updated.splice(fromIndex, 1);
+                          updated.splice(toIndex, 0, moved);
 
-                    <p className="text-xs text-white/60 mt-1">
-                      Display Order: {img.display_order}
-                    </p>
-                  </div>
-                ))}
+                          return updated.map((img, idx) => ({
+                            ...img,
+                            display_order: idx,
+                          }));
+                        });
+                      }}
+                      className="bg-white/10 rounded p-2 text-center cursor-pointer relative"
+                    >
+                      <div className="relative">
+                        <img
+                          src={img.image}
+                          alt={`Image ${index + 1}`}
+                          className={`w-full h-40 object-contain mb-2 rounded ${
+                            isReplacing ? "opacity-50" : ""
+                          }`}
+                        />
+
+                        {/* ✏️ Edit Icon */}
+                        <label
+                          htmlFor={`replace-${img.id}`}
+                          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 hover:bg-black/80 text-white cursor-pointer transition-colors"
+                          title="Replace Image"
+                        >
+                          {isReplacing ? (
+                            // Circular loader while replacing
+                            <svg
+                              className="animate-spin h-5 w-5 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v8H4z"
+                              ></path>
+                            </svg>
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                          )}
+                        </label>
+
+                        <input
+                          id={`replace-${img.id}`}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+
+                            const formData = new FormData();
+                            formData.append("image", file);
+
+                            try {
+                              setUploadingImages((prev) => ({
+                                ...prev,
+                                [img.id]: true,
+                              }));
+
+                              const updated =
+                                await api.product.updateProductImg(
+                                  img.id.toString(),
+                                  formData
+                                );
+                              toast.success("Image updated!");
+
+                              // Update the image in modalImages
+                              setModalImages(
+                                (prev) =>
+                                  prev?.map((imgObj) =>
+                                    imgObj.id === img.id
+                                      ? { ...imgObj, image: updated.data.image }
+                                      : imgObj
+                                  ) || null
+                              );
+                            } catch (error) {
+                              console.error("Failed to replace image:", error);
+                              toast.error("Failed to update image.");
+                            } finally {
+                              setUploadingImages((prev) => ({
+                                ...prev,
+                                [img.id]: false,
+                              }));
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
 
             {modalImages.length < 5 && (
