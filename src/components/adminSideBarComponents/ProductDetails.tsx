@@ -156,7 +156,8 @@ const ProductDetails = () => {
                 <div className="absolute bottom-2 right-2 flex gap-2">
                   <button
                     onClick={() => {
-                      setEditingProduct({ ...product, images: [] }); // strip out images
+                      // setEditingProduct({ ...product, images: [] }); // strip out images
+                      setEditingProduct(product);
                       setIsFormOpen(true);
                     }}
                     className="text-blue-500 hover:text-blue-700"
@@ -174,7 +175,7 @@ const ProductDetails = () => {
                   </button>
                 </div>
 
-                {product.images?.[0]?.image && (
+                {/* {product.images?.[0]?.image && (
                   <div className="relative">
                     <img
                       src={product.images[0].image}
@@ -210,7 +211,53 @@ const ProductDetails = () => {
                       </>
                     )}
                   </div>
-                )}
+                )} */}
+                {(() => {
+                  // Find the main image (is_main === true)
+                  const mainImage =
+                    product.images?.find((img) => img.is_main) ||
+                    product.images?.[0];
+
+                  if (!mainImage) return null; // no images at all
+
+                  return (
+                    <div className="relative">
+                      <img
+                        src={mainImage.image}
+                        alt={product.name}
+                        className="w-full h-48 object-contain bg-white/10 rounded-lg mb-4"
+                      />
+
+                      {product.images.length >= 1 && (
+                        <>
+                          <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            {product.images.length} Images
+                          </div>
+                          <button
+                            onClick={() => {
+                              setModalImages(
+                                product.images.map((img) => ({
+                                  id: img.id,
+                                  image: img.image,
+                                  display_order: img.display_order,
+                                  alt_text: img.alt_text,
+                                  is_main: img.is_main,
+                                }))
+                              );
+                              setSelectedProductId(product.id);
+                              // setSelectedImageIds(
+                              //   product.images.map((img) => img.id)
+                              // );
+                            }}
+                            className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 text-xs px-2 py-1 rounded text-white"
+                          >
+                            View All
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 <h3 className="text-lg font-semibold mb-1">{product.name}</h3>
 
@@ -346,14 +393,13 @@ const ProductDetails = () => {
                           }`}
                         />
 
-                        {/* ✏️ Edit Icon */}
+                        {/* Replace icon */}
                         <label
                           htmlFor={`replace-${img.id}`}
                           className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 hover:bg-black/80 text-white cursor-pointer transition-colors"
                           title="Replace Image"
                         >
                           {isReplacing ? (
-                            // Circular loader while replacing
                             <svg
                               className="animate-spin h-5 w-5 text-white"
                               xmlns="http://www.w3.org/2000/svg"
@@ -403,15 +449,12 @@ const ProductDetails = () => {
                                 ...prev,
                                 [img.id]: true,
                               }));
-
                               const updated =
                                 await api.product.updateProductImg(
                                   img.id.toString(),
                                   formData
                                 );
                               toast.success("Image updated!");
-
-                              // Update the image in modalImages
                               setModalImages(
                                 (prev) =>
                                   prev?.map((imgObj) =>
@@ -432,6 +475,47 @@ const ProductDetails = () => {
                           }}
                         />
                       </div>
+
+                      {/* ✅ Alt Text Input */}
+                      <input
+                        type="text"
+                        value={img.alt_text}
+                        onChange={(e) =>
+                          setModalImages(
+                            (prev) =>
+                              prev?.map((imgObj, i) =>
+                                i === index
+                                  ? { ...imgObj, alt_text: e.target.value }
+                                  : imgObj
+                              ) || null
+                          )
+                        }
+                        placeholder="Alt text"
+                        className="w-full text-sm px-2 py-1 rounded mb-2 text-black"
+                      />
+
+                      {/* ✅ Main Image Selector */}
+                      <label className="flex items-center justify-center gap-2 text-sm text-white">
+                        <input
+                          type="radio"
+                          name="mainImage"
+                          checked={img.is_main}
+                          onChange={() =>
+                            setModalImages(
+                              (prev) =>
+                                prev?.map((imgObj) => ({
+                                  ...imgObj,
+                                  is_main: imgObj.id === img.id,
+                                })) || null
+                            )
+                          }
+                        />
+                        Set as Main Image
+                      </label>
+
+                      <p className="text-xs text-white/60 mt-1">
+                        Display Order: {img.display_order}
+                      </p>
                     </div>
                   );
                 })}
