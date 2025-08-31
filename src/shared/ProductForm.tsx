@@ -11,7 +11,7 @@ export interface ProductFormProps {
     category: string;
     price: string;
     short_description?: string;
-    sale_price?: string;
+    // sale_price?: string;
     current_price?: string;
     stock_quantity?: string;
     ref_number?: string;
@@ -51,7 +51,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     category_id: categoryId || "",
     price: "",
     short_description: "",
-    sale_price: "",
+    // sale_price: "",
     ref_number: "",
     stock_quantity: "",
     status: [] as string[],
@@ -80,7 +80,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         category_id: defaultValues?.category || categoryId || "",
         price: defaultValues?.price || "",
         short_description: defaultValues?.short_description || "",
-        sale_price: defaultValues?.sale_price || "",
+        // sale_price: defaultValues?.sale_price || "",
         ref_number: defaultValues?.ref_number || "",
         stock_quantity: defaultValues?.stock_quantity || "",
         status: defaultValues?.status || [],
@@ -213,7 +213,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       data.append("price", formData.price);
       data.append("ref_number", formData.ref_number);
       data.append("short_description", formData.short_description);
-      data.append("sale_price", formData.sale_price);
+      // data.append("sale_price", formData.sale_price);
       data.append("stock_quantity", formData.stock_quantity);
       data.append("meta_description", formData.meta_description);
       data.append("meta_title", formData.meta_title);
@@ -302,7 +302,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </div>
 
             {/* Price */}
-            {/* <div>
+            <div>
               <label className="text-sm text-white/80">Price</label>
               <input
                 type="number"
@@ -313,7 +313,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 className="w-full mt-1 p-2 rounded bg-black/20 border border-white/10"
                 required
               />
-            </div> */}
+            </div>
 
             {/* <div>
               <label className="text-sm text-white/80">Sale Price</label>

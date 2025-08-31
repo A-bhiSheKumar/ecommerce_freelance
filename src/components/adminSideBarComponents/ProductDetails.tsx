@@ -85,7 +85,7 @@ const ProductDetails = () => {
                   category: editingProduct.category?.id || categoryId || "",
                   price: editingProduct.price?.toString() || "",
                   short_description: editingProduct.short_description || "",
-                  sale_price: editingProduct.sale_price?.toString() || "",
+                  // sale_price: editingProduct.sale_price?.toString() || "",
                   ref_number: editingProduct?.ref_number || "",
                   stock_quantity:
                     editingProduct.stock_quantity?.toString() || "",
@@ -225,6 +225,9 @@ const ProductDetails = () => {
                 {/* <p className="text-xl font-bold text-yellow-300 mb-1">
                   ${product.sale_price}
                 </p> */}
+                <p className="text-xl font-bold text-yellow-300 mb-1">
+                  Price: ${product.price}
+                </p>
                 {/* {product.sale_price && (
                   <p className="text-sm line-through text-white/50">
                     OriginalPrice: ${product.price}

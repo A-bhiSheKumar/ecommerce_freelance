@@ -198,9 +198,9 @@ const ViewCotation = () => {
                       <h3 className="text-base font-medium text-gray-800">
                         {item.product.name}
                       </h3>
-                      <p className="text-sm text-gray-500">
+                      {/* <p className="text-sm text-gray-500">
                         {item.product.category.name}
-                      </p>
+                      </p> */}
                       <div className="mt-1 flex items-center text-sm text-gray-500">
                         <span className="mr-3">Qty: {item.quantity}</span>
                         <span>Price: ₹{item.price}</span>
